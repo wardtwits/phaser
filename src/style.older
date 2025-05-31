@@ -1,0 +1,23 @@
+body, html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #181818;
+ cursor: url('/cursor.png'), pointer; 
+}
+canvas {
+  width: 90vw !important;
+  height: 90vh !important;
+  display: block;
+  margin: 0 auto;
+  box-shadow: 0 0 16px #000a;
+  border-radius: 8px;
+  cursor: url('/cursor.png'), pointer;
+  background: #222;
+}

@@ -1,0 +1,52 @@
+import '/style.css';
+import Phaser from 'phaser';
+
+const config = {
+  type: Phaser.AUTO,
+  width: 640,
+  height: 480,
+  backgroundColor: '#222',
+  scene: {
+    preload,
+    create
+  }
+};
+
+const TILE_SIZE = 80;
+const GRID_ROWS = 4;
+const GRID_COLS = 4;
+
+const tileKeys = [
+  'tile1', 'tile2', 'tile3', 'tile4',
+  'tile5', 'tile6', 'tile7', 'tile8'
+];
+
+let tiles = [];
+let revealedTiles = [];
+let matchedTiles = 0;
+let canClick = true;
+
+// Preload images
+function preload() {
+  // Load tile face images
+  for (let i = 1; i <= 8; i++) {
+    this.load.image(`tile${i}`, `/tile${i}.png`);
+  }
+  // Load tile back image
+  this.load.image('tile_back', '/tile_back.png');
+}
+
+function create() {
+  // Create pairs and shuffle
+  let keys = tileKeys.concat(tileKeys); // duplicate for pairs
+  Phaser.Utils.Array.Shuffle(keys);
+
+  tiles = [];
+  matchedTiles = 0;
+  canClick = true;
+  revealedTiles = [];
+
+  for (let row = 0; row < GRID_ROWS; row++) {
+    for (let col = 0; col < GRID_COLS
+}
+

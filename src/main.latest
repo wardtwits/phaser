@@ -1,0 +1,137 @@
+import './style.css';
+import Phaser from 'phaser';
+
+const GRID_ROWS = 4;
+const GRID_COLS = 4;
+const TILE_SIZE = 80;
+const PADDING = 10;
+const GAME_WIDTH = TILE_SIZE * GRID_COLS + 160;
+const GAME_HEIGHT = TILE_SIZE * GRID_ROWS + 160;
+
+const tileKeys = [
+  'tile1', 'tile2', 'tile3', 'tile4',
+  'tile5', 'tile6', 'tile7', 'tile8'
+];
+
+let tiles = [];
+let revealedTiles = [];
+let matchedTiles = 0;
+let canClick = true;
+
+const config = {
+  type: Phaser.AUTO,
+  width: GAME_WIDTH,
+  height: GAME_HEIGHT,
+  backgroundColor: '#222',
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+    width: GAME_WIDTH,
+    height: GAME_HEIGHT
+  },
+  scene: {
+    preload,
+    create
+  }
+};
+
+function preload() {
+  for (let i = 1; i <= 8; i++) {
+    this.load.image(`tile${i}`, `/tile${i}.png`);
+  }
+  this.load.image('tile_back', '/tile_back.png');
+}
+
+function create() {
+  let keys = tileKeys.concat(tileKeys);
+  Phaser.Utils.Array.Shuffle(keys);
+
+  tiles = [];
+  matchedTiles = 0;
+  canClick = true;
+  revealedTiles = [];
+
+  const startX = 80;
+  const startY = 80;
+
+  for (let row = 0; row < GRID_ROWS; row++) {
+    for (let col = 0; col < GRID_COLS; col++) {
+      const idx = row * GRID_COLS + col;
+      const key = keys[idx];
+      const x = startX + col * TILE_SIZE;
+      const y = startY + row * TILE_SIZE;
+
+      // Draw a white rounded rectangle as the background for each tile
+      const bg = this.add.rectangle(x, y, TILE_SIZE - PADDING, TILE_SIZE - PADDING, 0xffffff, 1)
+        .setOrigin(0.5, 0.5)
+        .setStrokeStyle(2, 0xcccccc);
+
+      const sprite = this.add.image(x, y, 'tile_back')
+        .setInteractive()
+        .setOrigin(0.5, 0.5);
+
+      // Fit sprite into tile box while preserving aspect ratio
+      fitSprite(sprite, TILE_SIZE - PADDING, TILE_SIZE - PADDING);
+
+      const tile = {
+        row, col, key,
+        revealed: false,
+        matched: false,
+        sprite,
+        bg
+      };
+
+      sprite.on('pointerdown', () => onTileClicked.call(this, tile));
+      tiles.push(tile);
+    }
+  }
+}
+
+function fitSprite(sprite, maxW, maxH) {
+  // Only call after the texture is loaded!
+  const frame = sprite.texture.getSourceImage();
+  if (!frame) return;
+
+  const iw = frame.width;
+  const ih = frame.height;
+  const scale = Math.min(maxW / iw, maxH / ih, 1);
+  sprite.setScale(scale);
+}
+
+function onTileClicked(tile) {
+  if (!canClick || tile.revealed || tile.matched) return;
+
+  tile.revealed = true;
+  tile.sprite.setTexture(tile.key);
+  fitSprite(tile.sprite, TILE_SIZE - PADDING, TILE_SIZE - PADDING);
+
+  revealedTiles.push(tile);
+
+  if (revealedTiles.length === 2) {
+    canClick = false;
+    const [a, b] = revealedTiles;
+    if (a.key === b.key) {
+      a.matched = b.matched = true;
+      matchedTiles += 2;
+      revealedTiles = [];
+      canClick = true;
+      if (matchedTiles === tiles.length) {
+        setTimeout(() => alert('You win!'), 300);
+      }
+    } else {
+      setTimeout(() => {
+        a.revealed = b.revealed = false;
+        a.sprite.setTexture('tile_back');
+        fitSprite(a.sprite, TILE_SIZE - PADDING, TILE_SIZE - PADDING);
+
+        b.sprite.setTexture('tile_back');
+        fitSprite(b.sprite, TILE_SIZE - PADDING, TILE_SIZE - PADDING);
+
+        revealedTiles = [];
+        canClick = true;
+      }, 1000);
+    }
+  }
+}
+
+export default new Phaser.Game(config);

@@ -1,0 +1,108 @@
+import Phaser from 'phaser';
+
+import './style.css';
+
+
+const config = {
+  type: Phaser.AUTO,
+  width: 840,
+  height: 880,
+  backgroundColor: '#222',
+  scene: {
+    preload,
+    create
+  }
+};
+
+const TILE_SIZE = 180;
+const GRID_ROWS = 4;
+const GRID_COLS = 4;
+
+const tileKeys = [
+  'tile1', 'tile2', 'tile3', 'tile4',
+  'tile5', 'tile6', 'tile7', 'tile8'
+];
+
+let tiles = [];
+let revealedTiles = [];
+let matchedTiles = 0;
+let canClick = true;
+
+// Preload images
+function preload() {
+  // Load tile face images
+  for (let i = 1; i <= 8; i++) {
+    this.load.image(`tile${i}`, `/tile${i}.png`);
+  }
+  // Load tile back image
+  this.load.image('tile_back', '/tile_back.png');
+}
+
+function create() {
+
+  // Set custom cursor
+  this.game.canvas.style.cursor = 'url("/cursor.png"), pointer';
+
+  // Create pairs and shuffle
+  let keys = tileKeys.concat(tileKeys); // duplicate for pairs
+  Phaser.Utils.Array.Shuffle(keys);
+
+  tiles = [];
+  matchedTiles = 0;
+  canClick = true;
+  revealedTiles = [];
+
+  // Create tile objects
+  for (let row = 0; row < GRID_ROWS; row++) {
+    for (let col = 0; col < GRID_COLS; col++) {
+      const idx = row * GRID_COLS + col;
+      const key = keys[idx];
+      const x = 120 + col * TILE_SIZE;
+      const y = 80 + row * TILE_SIZE;
+      const tile = {
+        row, col, key,
+        revealed: false,
+        matched: false,
+        sprite: this.add.image(x, y, 'tile_back')
+          .setDisplaySize(TILE_SIZE - 10, TILE_SIZE - 10)
+          .setInteractive()
+      };
+
+      tile.sprite.on('pointerdown', () => onTileClicked.call(this, tile));
+      tiles.push(tile);
+    }
+  }
+}
+
+// Handle tile clicks
+function onTileClicked(tile) {
+  if (!canClick || tile.revealed || tile.matched) return;
+
+  tile.revealed = true;
+  tile.sprite.setTexture(tile.key);
+  revealedTiles.push(tile);
+
+  if (revealedTiles.length === 2) {
+    canClick = false;
+    const [a, b] = revealedTiles;
+    if (a.key === b.key) {
+      a.matched = b.matched = true;
+      matchedTiles += 2;
+      revealedTiles = [];
+      canClick = true;
+      if (matchedTiles === tiles.length) {
+        setTimeout(() => alert('You win!'), 300);
+      }
+    } else {
+      setTimeout(() => {
+        a.revealed = b.revealed = false;
+        a.sprite.setTexture('tile_back');
+        b.sprite.setTexture('tile_back');
+        revealedTiles = [];
+        canClick = true;
+      }, 1000);
+    }
+  }
+}
+
+export default new Phaser.Game(config);

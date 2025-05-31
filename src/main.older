@@ -1,0 +1,17 @@
+import './style.css';
+import Phaser from 'phaser';
+
+const config = {
+  type: Phaser.AUTO,
+  width: 640,
+  height: 480,
+  backgroundColor: '#222',
+  scene: { preload, create }
+};
+
+function preload() {}
+function create() {}
+
+this.game.canvas.style.cursor = 'url("/cursor.png"), pointer';
+
+export default new Phaser.Game(config);
