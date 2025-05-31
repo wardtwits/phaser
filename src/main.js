@@ -17,6 +17,7 @@ let tiles = [];
 let revealedTiles = [];
 let matchedTiles = 0;
 let canClick = true;
+let clickTotal = 0;
 
 const config = {
   type: Phaser.AUTO,
@@ -131,7 +132,7 @@ function onTileClicked(tile) {
 
       // Winner Winner!
       if (matchedTiles === tiles.length) {
-        setTimeout(() => alert('You win!'), 300);
+        setTimeout(() => alert('You win! Total clicks: '+clickTotal), 300);
       }
 
     } else {
@@ -146,6 +147,7 @@ function onTileClicked(tile) {
         canClick = true;
       }, 300);
     }
+    clickTotal++;
   }
 }
 
