@@ -42,6 +42,7 @@ function preload() {
   }
   this.load.image('tile_back', '/tile_back.png');
   this.load.image('tile_back_hover', '/tile_back_hover.png'); // <-- Add hover image
+
 }
 
 function create() {
@@ -100,6 +101,9 @@ sprite.on('pointerdown', () => onTileClicked.call(this, tile));
     }
   }
 }
+
+
+
 
 function fitSprite(scene, sprite, textureKey, maxW, maxH) {
   // Ensures the image fits within maxW x maxH, preserving aspect ratio
