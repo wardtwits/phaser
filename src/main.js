@@ -77,7 +77,7 @@ function create() {
         sprite
       };
 
-      // --- Hover effect ---
+      // --- Cursor Hover effect ---
      sprite.on('pointerover', () => {
   if (!tile.revealed && !tile.matched) {
     sprite.setTexture('tile_back_hover');
@@ -89,6 +89,7 @@ sprite.on('pointerout', () => {
   if (!tile.revealed && !tile.matched) {
     sprite.setTexture('tile_back');
     fitSprite(this, sprite, 'tile_back', boxSize, boxSize);
+    // Donut cursor
     this.game.canvas.style.cursor = 'url("/cursor.png") 0 0, pointer';
   }
 });
@@ -127,10 +128,14 @@ function onTileClicked(tile) {
       matchedTiles += 2;
       revealedTiles = [];
       canClick = true;
+
+      // Winner Winner!
       if (matchedTiles === tiles.length) {
         setTimeout(() => alert('You win!'), 300);
       }
+
     } else {
+      // Try again
       setTimeout(() => {
         a.revealed = b.revealed = false;
         a.sprite.setTexture('tile_back');
@@ -139,7 +144,7 @@ function onTileClicked(tile) {
         fitSprite(this, b.sprite, 'tile_back', TILE_SIZE - 14, TILE_SIZE - 14);
         revealedTiles = [];
         canClick = true;
-      }, 900);
+      }, 300);
     }
   }
 }
