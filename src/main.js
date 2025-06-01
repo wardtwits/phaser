@@ -54,6 +54,7 @@ function create() {
   canClick = true;
   revealedTiles = [];
 
+
   const boxSize = TILE_SIZE - 14;
   for (let row = 0; row < GRID_ROWS; row++) {
     for (let col = 0; col < GRID_COLS; col++) {
@@ -61,6 +62,8 @@ function create() {
       const key = keys[idx];
       const x = col * TILE_SIZE + TILE_SIZE / 2;
       const y = row * TILE_SIZE + TILE_SIZE / 2;
+      
+      
 
       this.add.rectangle(x, y, boxSize, boxSize, 0xffffff, 1)
         .setOrigin(0.5, 0.5)
@@ -69,6 +72,7 @@ function create() {
       const sprite = this.add.image(x, y, 'tile_back')
         .setInteractive({ useHandCursor: true }) // ensures pointer events and hand cursor
         .setOrigin(0.5, 0.5);
+        
 
       fitSprite(this, sprite, 'tile_back', boxSize, boxSize);
 
@@ -84,6 +88,15 @@ function create() {
   if (!tile.revealed && !tile.matched) {
     sprite.setTexture('tile_back_hover');
     fitSprite(this, sprite, 'tile_back_hover', boxSize, boxSize);
+    // Glow effect
+    this.tweens.add({
+      targets: sprite,
+      alpha: 0.7,
+      yoyo: true,
+      repeat: 2,
+      duration: 100,
+      onComplete: () => sprite.setAlpha(1)
+    });
     this.game.canvas.style.cursor = 'url("/cursor.png") 0 0, pointer';
   }
 });
@@ -108,6 +121,7 @@ sprite.on('pointerdown', () => onTileClicked.call(this, tile));
 function fitSprite(scene, sprite, textureKey, maxW, maxH) {
   // Ensures the image fits within maxW x maxH, preserving aspect ratio
   const tex = scene.textures.get(textureKey);
+
   if (!tex || !tex.source[0]) return;
 
   const iw = tex.source[0].width;
@@ -154,5 +168,6 @@ function onTileClicked(tile) {
     clickTotal++;
   }
 }
+
 
 export default new Phaser.Game(config);
