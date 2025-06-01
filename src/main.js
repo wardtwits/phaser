@@ -17,6 +17,7 @@ let tiles = [];
 let revealedTiles = [];
 let matchedTiles = 0;
 let canClick = true;
+let clickTotal = 0;
 
 const config = {
   type: Phaser.AUTO,
@@ -41,6 +42,7 @@ function preload() {
   }
   this.load.image('tile_back', '/tile_back.png');
   this.load.image('tile_back_hover', '/tile_back_hover.png'); // <-- Add hover image
+
 }
 
 function create() {
@@ -52,6 +54,7 @@ function create() {
   canClick = true;
   revealedTiles = [];
 
+
   const boxSize = TILE_SIZE - 14;
   for (let row = 0; row < GRID_ROWS; row++) {
     for (let col = 0; col < GRID_COLS; col++) {
@@ -59,6 +62,8 @@ function create() {
       const key = keys[idx];
       const x = col * TILE_SIZE + TILE_SIZE / 2;
       const y = row * TILE_SIZE + TILE_SIZE / 2;
+      
+      
 
       this.add.rectangle(x, y, boxSize, boxSize, 0xffffff, 1)
         .setOrigin(0.5, 0.5)
@@ -67,6 +72,7 @@ function create() {
       const sprite = this.add.image(x, y, 'tile_back')
         .setInteractive({ useHandCursor: true }) // ensures pointer events and hand cursor
         .setOrigin(0.5, 0.5);
+        
 
       fitSprite(this, sprite, 'tile_back', boxSize, boxSize);
 
@@ -77,11 +83,20 @@ function create() {
         sprite
       };
 
-      // --- Hover effect ---
+      // --- Cursor Hover effect ---
      sprite.on('pointerover', () => {
   if (!tile.revealed && !tile.matched) {
     sprite.setTexture('tile_back_hover');
     fitSprite(this, sprite, 'tile_back_hover', boxSize, boxSize);
+    // Glow effect
+    this.tweens.add({
+      targets: sprite,
+      alpha: 0.7,
+      yoyo: true,
+      repeat: 2,
+      duration: 100,
+      onComplete: () => sprite.setAlpha(1)
+    });
     this.game.canvas.style.cursor = 'url("/cursor.png") 0 0, pointer';
   }
 });
@@ -89,6 +104,7 @@ sprite.on('pointerout', () => {
   if (!tile.revealed && !tile.matched) {
     sprite.setTexture('tile_back');
     fitSprite(this, sprite, 'tile_back', boxSize, boxSize);
+    // Donut cursor
     this.game.canvas.style.cursor = 'url("/cursor.png") 0 0, pointer';
   }
 });
@@ -99,9 +115,13 @@ sprite.on('pointerdown', () => onTileClicked.call(this, tile));
   }
 }
 
+
+
+
 function fitSprite(scene, sprite, textureKey, maxW, maxH) {
   // Ensures the image fits within maxW x maxH, preserving aspect ratio
   const tex = scene.textures.get(textureKey);
+
   if (!tex || !tex.source[0]) return;
 
   const iw = tex.source[0].width;
@@ -127,10 +147,14 @@ function onTileClicked(tile) {
       matchedTiles += 2;
       revealedTiles = [];
       canClick = true;
+
+      // Winner Winner!
       if (matchedTiles === tiles.length) {
-        setTimeout(() => alert('You win!'), 300);
+        setTimeout(() => alert('You win! Total clicks: '+clickTotal), 300);
       }
+
     } else {
+      // Try again
       setTimeout(() => {
         a.revealed = b.revealed = false;
         a.sprite.setTexture('tile_back');
@@ -139,9 +163,11 @@ function onTileClicked(tile) {
         fitSprite(this, b.sprite, 'tile_back', TILE_SIZE - 14, TILE_SIZE - 14);
         revealedTiles = [];
         canClick = true;
-      }, 900);
+      }, 300);
     }
+    clickTotal++;
   }
 }
+
 
 export default new Phaser.Game(config);
